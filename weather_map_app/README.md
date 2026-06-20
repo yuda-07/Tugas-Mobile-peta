@@ -1,3 +1,146 @@
+# Weather & Map App
+
+Aplikasi Flutter untuk menampilkan informasi cuaca real-time dan peta interaktif. Dibangun sebagai tugas mata kuliah Perangkat Bergerak, Semester 4.
+
+## Screenshot
+
+| Halaman Cuaca | Halaman Peta |
+|:---:|:---:|
+| ![Home](Home.png) | ![Peta](Peta.png) |
+
+## Fitur Utama
+
+### Halaman Cuaca
+- Menampilkan cuaca saat ini berdasarkan lokasi pengguna (suhu, kelembaban, kecepatan angin)
+- Prakiraan cuaca 7 hari ke depan dalam format horizontal scroll
+- Pencarian kota dengan autocomplete menggunakan Open-Meteo Geocoding API
+- Pull-to-refresh untuk memuat ulang data cuaca
+- Fallback ke Jakarta jika lokasi tidak tersedia
+
+### Halaman Peta
+- Peta interaktif menggunakan OpenStreetMap (via `flutter_map`)
+- Tap pada peta untuk melihat cuaca di lokasi tertentu
+- Tombol navigasi ke lokasi saat ini
+- Kontrol zoom in/out
+- Popup informasi cuaca (suhu, deskripsi, kelembaban, angin) pada lokasi yang dipilih
+
+## Tech Stack
+
+| Teknologi | Keterangan |
+|---|---|
+| **Flutter** | Framework UI cross-platform |
+| **Dart** | Bahasa pemrograman (SDK ^3.11.1) |
+| **http** | HTTP client untuk API calls |
+| **flutter_map** | Rendering peta OpenStreetMap |
+| **latlong2** | Library koordinat geografis |
+| **geolocator** | Akses lokasi GPS perangkat |
+| **intl** | Formatting tanggal dan waktu |
+
+## API
+
+Aplikasi ini menggunakan **Open-Meteo API** (gratis, tanpa API key):
+
+- **Weather Forecast**: `https://api.open-meteo.com/v1/forecast`
+- **Geocoding**: `https://geocoding-api.open-meteo.com/v1/search`
+
+## Struktur Proyek
+
+```
+lib/
+├── main.dart                   # Entry point aplikasi
+├── models/
+│   └── weather_model.dart      # Model data: WeatherData, ForecastData, LocationData
+├── screens/
+│   ├── home_screen.dart        # Bottom navigation (Cuaca & Peta)
+│   ├── weather_screen.dart     # Halaman cuaca + pencarian kota
+│   └── map_screen.dart         # Halaman peta interaktif
+├── services/
+│   ├── weather_service.dart    # Service API cuaca & geocoding
+│   └── location_service.dart   # Service GPS & perizinan lokasi
+└── widgets/
+    ├── weather_card.dart       # Kartu cuaca utama (gradient biru)
+    └── forecast_item.dart      # Item prakiraan harian
+```
+
+## Instalasi
+
+### Prasyarat
+- Flutter SDK >= 3.11.1
+- Android Studio / VS Code
+- Emulator Android atau perangkat fisik
+
+### Langkah-langkah
+
+1. **Clone repository**
+   ```bash
+   git clone <repository-url>
+   cd weather_map_app
+   ```
+
+2. **Install dependencies**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Jalankan aplikasi**
+   ```bash
+   flutter run
+   ```
+
+4. **Build APK (release)**
+   ```bash
+   flutter build apk
+   ```
+   Output: `build/app/outputs/flutter-apk/app-release.apk`
+
+## Model Data
+
+### WeatherData
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `temperature` | `double` | Suhu dalam °C |
+| `humidity` | `double` | Kelembaban (%) |
+| `windSpeed` | `double` | Kecepatan angin (km/h) |
+| `weatherCode` | `int` | Kode cuaca dari API |
+| `description` | `String` | Deskripsi cuaca (Bahasa Indonesia) |
+| `location` | `String` | Nama lokasi |
+
+### ForecastData
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `date` | `DateTime` | Tanggal prakiraan |
+| `tempMax` | `double` | Suhu maksimum (°C) |
+| `tempMin` | `double` | Suhu minimum (°C) |
+| `weatherCode` | `int` | Kode cuaca dari API |
+| `description` | `String` | Deskripsi cuaca |
+
+### LocationData
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `name` | `String` | Nama kota/lokasi |
+| `latitude` | `double` | Koordinat lintang |
+| `longitude` | `double` | Koordinat bujur |
+| `country` | `String?` | Nama negara |
+| `admin1` | `String?` | Provinsi/wilayah |
+
+## Kode Cuaca (WMO)
+
+| Kode | Deskripsi | Ikon |
+|---|---|---|
+| 0 | Cerah | ☀️ |
+| 1-2 | Cerah Berawan | 🌤️ |
+| 3 | Berawan | ☁️ |
+| 45-48 | Berkabut | 🌫️ |
+| 51-57 | Gerimis | 🌦️ |
+| 61-67 | Hujan | 🌧️ |
+| 71-77 | Salju | 🌨️ |
+| 80-82 | Hujan Lebat | 🌧️ |
+| 85-86 | Hujan Salju Lebat | 🌨️ |
+| 95-99 | Badai Petir | ⛈️ |
+
+## Lisensi
+
+Proyek ini dibuat untuk tujuan pendidikan.
 # Aplikasi Cuaca & Peta (Weather & Map)
 
 Aplikasi mobile Flutter yang menampilkan data cuaca real-time dan peta interaktif. Menggunakan Open-Meteo API dan OpenStreetMap - **tanpa memerlukan API key berbayar**.

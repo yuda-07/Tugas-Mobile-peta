@@ -1,5 +1,6 @@
 import 'package:geolocator/geolocator.dart';
 
+
 class LocationService {
   // Check if location services are enabled
   Future<bool> isLocationServiceEnabled() async {
