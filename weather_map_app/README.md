@@ -1,355 +1,198 @@
-# 🌦️ Aplikasi Cuaca & Peta (Weather & Map)
+# Laporan Praktikum: Aplikasi Cuaca & Peta Berbasis Mobile
 
-Aplikasi mobile **Flutter** yang menampilkan data cuaca **real-time** dan peta interaktif. Menggunakan **Open-Meteo API** dan **OpenStreetMap** — **tanpa memerlukan API key berbayar**.
-
-> **Tugas Kuliah Semester 4 — Mata Kuliah Perangkat Bergerak**
-
----
-
-## 📸 Screenshot
-
-| Tab Cuaca | Tab Peta |
-|:---:|:---:|
-| <img src="Home.png" alt="Tab Cuaca" width="300"/> | <img src="Peta.png" alt="Tab Peta" width="300"/> |
-| Cuaca lokasi saat ini, pencarian kota, prakiraan 7 hari | Peta interaktif OpenStreetMap, tap untuk melihat cuaca |
+**Mata Kuliah**: Perangkat Bergerak  
+**Semester**: 4 (Genap 2025/2026)  
+**Versi Aplikasi**: 1.0.0  
+**Framework**: Flutter 3.41.4 | Dart 3.11.1  
 
 ---
 
-## ✨ Fitur Utama
+## Daftar Isi
 
-### 🌡️ Tab Cuaca
-- **Deteksi Lokasi Otomatis** — Mendeteksi lokasi user via GPS (fallback ke Jakarta jika gagal)
-- **Pencarian Kota** — Cari kota manapun di dunia dengan autocomplete (Bahasa Indonesia)
-- **Cuaca Saat Ini** — Suhu, kelembaban, kecepatan angin, dan kondisi cuaca lengkap dengan emoji
-- **Prakiraan 7 Hari** — Prakiraan cuaca harian selama seminggu ke depan (scrollable)
-- **Pull to Refresh** — Tarik ke bawah untuk memperbarui data cuaca
-
-### 🗺️ Tab Peta
-- **Peta Interaktif** — OpenStreetMap yang bisa di-zoom dan digeser
-- **Tap untuk Cuaca** — Tap lokasi manapun di peta untuk melihat cuaca di titik tersebut
-- **Marker Lokasi** — Marker biru untuk lokasi saat ini dan lokasi yang dipilih
-- **Kontrol Peta** — Tombol zoom in/out dan kembali ke lokasi saat ini
-- **Bottom Sheet** — Detail cuaca muncul di bottom sheet saat lokasi dipilih
-
----
-
-## 🛠️ Teknologi yang Digunakan
-
-| Dependency | Versi | Kegunaan |
-|---|---|---|
-| **Flutter** | 3.x (SDK ^3.11.1) | Framework UI cross-platform |
-| **http** | ^1.6.0 | HTTP client untuk API requests |
-| **flutter_map** | ^8.3.0 | Widget peta interaktif |
-| **latlong2** | ^0.9.1 | Koordinat latitude/longitude |
-| **geolocator** | ^14.0.3 | Akses lokasi GPS perangkat |
-| **intl** | ^0.20.2 | Format tanggal dan waktu |
-| **cupertino_icons** | ^1.0.8 | Ikon gaya iOS |
-
-### API & Layanan Gratis (Tanpa API Key)
-
-| Layanan | URL | Fungsi |
-|---|---|---|
-| **Open-Meteo Forecast** | `https://api.open-meteo.com/v1/forecast` | Data cuaca real-time + prakiraan 7 hari |
-| **Open-Meteo Geocoding** | `https://geocoding-api.open-meteo.com/v1/search` | Pencarian kota berdasarkan nama |
-| **OpenStreetMap Tiles** | `https://tile.openstreetmap.org/{z}/{x}/{y}.png` | Tile peta gratis & open-source |
+1. [Tujuan Praktikum](#1-tujuan-praktikum)
+2. [Deskripsi Aplikasi](#2-deskripsi-aplikasi)
+3. [Fitur Aplikasi](#3-fitur-aplikasi)
+4. [Screenshot Aplikasi](#4-screenshot-aplikasi)
+5. [Arsitektur & Desain](#5-arsitektur--desain)
+6. [Teknologi & Dependencies](#6-teknologi--dependencies)
+7. [Sumber Data API](#7-sumber-data-api)
+8. [Prasyarat Lingkungan](#8-prasyarat-lingkungan)
+9. [Langkah-langkah Instalasi & Menjalankan Aplikasi](#9-langkah-langkah-instalasi--menjalankan-aplikasi)
+10. [Panduan Penggunaan](#10-panduan-penggunaan)
+11. [Struktur Direktori Project](#11-struktur-direktori-project)
+12. [Penjelasan Kode](#12-penjelasan-kode)
+13. [Konfigurasi Android](#13-konfigurasi-android)
+14. [Troubleshooting](#14-troubleshooting)
+15. [Kesimpulan](#15-kesimpulan)
 
 ---
 
-## 📁 Struktur Project
+## 1. Tujuan Praktikum
+
+- Mengimplementasikan aplikasi mobile menggunakan framework **Flutter** untuk platform Android.
+- Mengintegrasikan **API publik** (Open-Meteo) untuk pengambilan data cuaca secara real-time tanpa memerlukan API key.
+- Mengimplementasikan **peta interaktif** menggunakan OpenStreetMap dan library `flutter_map`.
+- Memanfaatkan **geolocator** untuk mendeteksi lokasi user berdasarkan GPS perangkat.
+- Menerapkan konsep **StatefulWidget**, **async/await**, dan **REST API consumption** dalam pengembangan aplikasi mobile.
+
+---
+
+## 2. Deskripsi Aplikasi
+
+**Cuaca & Peta** adalah aplikasi mobile cross-platform yang dibangun dengan Flutter, dirancang untuk menampilkan informasi cuaca real-time dan peta interaktif dalam satu antarmuka yang intuitif. Aplikasi ini memanfaatkan dua sumber data utama:
+
+- **Open-Meteo API** -- layanan data cuaca gratis dan terbuka yang menyediakan informasi cuaca saat ini, prakiraan harian, serta geocoding (pencarian lokasi berdasarkan nama kota).
+- **OpenStreetMap** -- proyek pemetaan kolaboratif open-source yang menyediakan tile peta gratis untuk ditampilkan dalam aplikasi.
+
+Keunggulan utama aplikasi ini adalah **tidak memerlukan API key berbayar** sama sekali, sehingga mudah untuk di-clone, dibangun, dan dijalankan oleh siapa saja.
+
+---
+
+## 3. Fitur Aplikasi
+
+### 3.1 Tab Cuaca (Weather)
+
+| No | Fitur | Deskripsi |
+|----|-------|-----------|
+| 1 | Deteksi Lokasi Otomatis | Aplikasi mendeteksi lokasi user via GPS saat pertama kali dibuka. Jika GPS tidak tersedia, fallback ke koordinat Jakarta. |
+| 2 | Pencarian Kota | Search bar dengan autocomplete yang terhubung ke Open-Meteo Geocoding API, mendukung pencarian kota di seluruh dunia. |
+| 3 | Cuaca Saat Ini | Menampilkan suhu (°C), kelembaban (%), kecepatan angin (km/h), kondisi cuaca (Cerah, Hujan, Berawan, dll), dan waktu pengambilan data. |
+| 4 | Prakiraan 7 Hari | Daftar prakiraan cuaca horizontal selama 7 hari ke depan, mencakup suhu maksimum, suhu minimum, dan ikon kondisi cuaca. |
+| 5 | Pull to Refresh | User dapat menarik layar ke bawah untuk memperbarui data cuaca secara manual. |
+| 6 | Error Handling | Tampilan pesan error yang informatif beserta tombol "Coba Lagi" jika terjadi kegagalan pengambilan data. |
+
+### 3.2 Tab Peta (Map)
+
+| No | Fitur | Deskripsi |
+|----|-------|-----------|
+| 1 | Peta Interaktif | Peta OpenStreetMap yang bisa di-zoom, digeser, dan dijelajahi secara bebas. |
+| 2 | Tap untuk Cuaca | Tap di titik mana saja pada peta untuk mengambil dan menampilkan data cuaca di lokasi tersebut. |
+| 3 | Marker Lokasi Saat Ini | Marker biru transparan menunjukkan posisi user saat ini berdasarkan GPS. |
+| 4 | Marker Lokasi Terpilih | Marker merah muncul di titik yang di-tap oleh user. |
+| 5 | Bottom Sheet Cuaca | Panel bawah yang muncul setelah tap, menampilkan suhu, kondisi, kelembaban, dan kecepatan angin. |
+| 6 | Kontrol Peta | Tombol floating untuk kembali ke lokasi user, zoom in, dan zoom out. |
+| 7 | Instruksi User | Banner di atas peta yang memberi petunjuk: "Tap peta untuk melihat cuaca di lokasi tersebut". |
+
+---
+
+## 4. Screenshot Aplikasi
+
+### 4.1 Tab Cuaca -- Tampilan Cuaca Saat Ini & Prakiraan 7 Hari
+
+<p align="center">
+  <img src="screenshots/weather_screen.png" alt="Tab Cuaca" width="300"/>
+</p>
+
+**Keterangan screenshot:**
+- Search bar "Cari kota..." untuk pencarian lokasi.
+- Card cuaca menampilkan lokasi "Lokasi Saat Ini" dengan suhu **27.7°C**, kondisi **Gerimis**, kelembaban **75%**, kecepatan angin **3.2 km/h**, dan waktu **21:20**.
+- Prakiraan 7 hari ditampilkan dalam card horizontal (Sabtu s/d Rabu) dengan ikon cuaca dan rentang suhu max/min.
+- Bottom navigation menunjukkan tab **Cuaca** aktif (ikon biru).
+
+### 4.2 Tab Peta -- Peta Interaktif OpenStreetMap
+
+<p align="center">
+  <img src="screenshots/map_screen.png" alt="Tab Peta" width="300"/>
+</p>
+
+**Keterangan screenshot:**
+- Peta menampilkan wilayah Jakarta dengan nama-nama daerah (Menteng, Kebon Sirih, Pasar Minggu, dll).
+- Marker biru transparan di tengah peta menunjukkan lokasi user saat ini.
+- Tombol kontrol di kanan atas: lokasi (bulat biru), zoom in (+), zoom out (-).
+- Banner instruksi di atas: "Tap peta untuk melihat cuaca di lokasi tersebut".
+- Bottom navigation menunjukkan tab **Peta** aktif (ikon biru).
+
+---
+
+## 5. Arsitektur & Desain
+
+Aplikasi ini menggunakan pola arsitektur **Service-Based Architecture** dengan pemisahan layer yang jelas:
 
 ```
-weather_map_app/
-├── lib/
-│   ├── main.dart                    # Entry point — MaterialApp + tema biru Material 3
-│   ├── models/
-│   │   └── weather_model.dart       # 3 model: WeatherData, ForecastData, LocationData
-│   ├── services/
-│   │   ├── weather_service.dart     # Fetch cuaca & geocoding dari Open-Meteo API
-│   │   └── location_service.dart    # Akses GPS + permission lokasi via geolocator
-│   ├── screens/
-│   │   ├── home_screen.dart         # Bottom navigation bar (2 tab: Cuaca & Peta)
-│   │   ├── weather_screen.dart      # Layar cuaca + search bar + prakiraan 7 hari
-│   │   └── map_screen.dart          # Layar peta interaktif + cuaca on-tap
-│   └── widgets/
-│       ├── weather_card.dart        # Card cuaca saat ini (suhu, kelembaban, angin)
-│       └── forecast_item.dart       # Item prakiraan harian (tanggal, icon, suhu)
-├── android/                         # Build Android
-├── ios/                             # Build iOS
-├── web/                             # Build Web
-├── Home.png                         # Screenshot tab Cuaca
-├── Peta.png                         # Screenshot tab Peta
-├── pubspec.yaml                     # Konfigurasi dependencies
-└── README.md                        # Dokumentasi ini
+┌─────────────────────────────────────────────────────┐
+│                    UI Layer (Screens)                │
+│   HomeScreen → WeatherScreen / MapScreen             │
+├─────────────────────────────────────────────────────┤
+│                 Widget Layer (Components)            │
+│   WeatherCard, ForecastItem                          │
+├─────────────────────────────────────────────────────┤
+│                  Service Layer (Logic)               │
+│   WeatherService, LocationService                    │
+├─────────────────────────────────────────────────────┤
+│                   Model Layer (Data)                 │
+│   WeatherData, ForecastData, LocationData            │
+├─────────────────────────────────────────────────────┤
+│                  External APIs                       │
+│   Open-Meteo API, OpenStreetMap Tiles                │
+└─────────────────────────────────────────────────────┘
 ```
+
+**Prinsip yang diterapkan:**
+- **Separation of Concerns** -- Model, Service, Screen, dan Widget dipisah ke file masing-masing.
+- **StatefulWidget** -- Setiap screen mengelola state-nya sendiri (loading, error, data).
+- **Async/Await** -- Semua pemanggilan API menggunakan pattern asynchronous.
+- **Error Handling** -- Try-catch di setiap layer dengan fallback dan pesan error yang informatif.
+- **Material Design 3** -- Menggunakan color scheme modern dengan seed color biru.
 
 ---
 
-## 🚀 Cara Menjalankan
+## 6. Teknologi & Dependencies
 
-### Prasyarat
-- [Flutter SDK](https://flutter.dev/docs/get-started/install) (versi 3.x+)
-- [Android Studio](https://developer.android.com/studio) atau [VS Code](https://code.visualstudio.com/) dengan Flutter plugin
-- Android Emulator atau perangkat fisik dengan USB Debugging
+### 6.1 Framework Utama
 
-### Langkah-langkah
+| Teknologi | Versi | Keterangan |
+|-----------|-------|------------|
+| **Flutter** | 3.41.4 (Stable) | Framework UI cross-platform dari Google |
+| **Dart** | 3.11.1 | Bahasa pemrograman yang digunakan Flutter |
+| **Material Design 3** | - | Design system modern untuk UI/UX |
 
-```bash
-# 1. Clone repository
-git clone <url-repo>
-cd weather_map_app
+### 6.2 Dependencies (dari pubspec.yaml)
 
-# 2. Install dependencies
-flutter pub get
+| Package | Versi | Fungsi |
+|---------|-------|--------|
+| `http` | ^1.6.0 | HTTP client untuk melakukan GET request ke Open-Meteo API dan Geocoding API |
+| `flutter_map` | ^8.3.0 | Widget peta interaktif yang mendukung tile OpenStreetMap, marker, dan event tap |
+| `latlong2` | ^0.9.1 | Library untuk manipulasi koordinat geografis (latitude & longitude) |
+| `geolocator` | ^14.0.3 | Plugin untuk mengakses layanan lokasi GPS perangkat, termasuk permission handling |
+| `intl` | ^0.20.2 | Library internasionalisasi untuk format tanggal dan waktu (prakiraan harian) |
+| `cupertino_icons` | ^1.0.8 | Ikon gaya iOS untuk kompatibilitas visual |
 
-# 3. Cek perangkat
-flutter devices
+### 6.3 Dev Dependencies
 
-# 4. Jalankan aplikasi
-flutter run
-```
-
-### Build APK
-
-```bash
-flutter build apk --release
-```
-
-File APK akan tersedia di:
-```
-build/app/outputs/flutter-apk/app-release.apk
-```
+| Package | Versi | Fungsi |
+|---------|-------|--------|
+| `flutter_test` | SDK | Framework unit testing bawaan Flutter |
+| `flutter_lints` | ^6.0.0 | Aturan lint untuk mendorong praktik coding yang baik |
 
 ---
 
-## 📊 Model Data
+## 7. Sumber Data API
 
-### WeatherData
-| Field | Tipe | Keterangan |
-|---|---|---|
-| `temperature` | `double` | Suhu dalam °C |
-| `humidity` | `double` | Kelembaban relatif (%) |
-| `windSpeed` | `double` | Kecepatan angin (km/h) |
-| `weatherCode` | `int` | Kode cuaca WMO |
-| `description` | `String` | Deskripsi cuaca (Bahasa Indonesia) |
-| `location` | `String` | Nama lokasi |
-| `time` | `DateTime` | Waktu pengambilan data |
+### 7.1 Open-Meteo Weather Forecast API
 
-### ForecastData
-| Field | Tipe | Keterangan |
-|---|---|---|
-| `date` | `DateTime` | Tanggal prakiraan |
-| `tempMax` | `double` | Suhu maksimum (°C) |
-| `tempMin` | `double` | Suhu minimum (°C) |
-| `weatherCode` | `int` | Kode cuaca WMO |
-| `description` | `String` | Deskripsi cuaca |
+- **Base URL**: `https://api.open-meteo.com/v1/forecast`
+- **Metode**: GET
+- **Autentikasi**: Tidak diperlukan (gratis, tanpa API key)
+- **Parameter yang digunakan**:
 
-### LocationData
-| Field | Tipe | Keterangan |
-|---|---|---|
-| `name` | `String` | Nama kota/lokasi |
-| `latitude` | `double` | Koordinat lintang |
-| `longitude` | `double` | Koordinat bujur |
-| `country` | `String?` | Negara |
-| `admin1` | `String?` | Provinsi/wilayah |
+| Parameter | Nilai | Keterangan |
+|-----------|-------|------------|
+| `latitude` | Koordinat lintang | Lokasi yang akan diambil cuacanya |
+| `longitude` | Koordinat bujur | Lokasi yang akan diambil cuacanya |
+| `current` | `temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m` | Variabel cuaca saat ini |
+| `daily` | `weather_code,temperature_2m_max,temperature_2m_min` | Variabel prakiraan harian |
+| `timezone` | `auto` | Zona waktu otomatis berdasarkan lokasi |
+| `forecast_days` | `7` | Jumlah hari prakiraan |
 
----
+**Weather Code Mapping** (kode cuaca ke deskripsi):
 
-## 🌤️ Kode Cuaca WMO
-
-| Kode | Deskripsi | Emoji |
-|:---:|---|:---:|
+| Kode | Deskripsi | Ikon |
+|------|-----------|------|
 | 0 | Cerah | ☀️ |
 | 1 | Cerah Berawan | 🌤️ |
 | 2 | Berawan Sebagian | 🌤️ |
 | 3 | Berawan | ☁️ |
 | 45, 48 | Berkabut | 🌫️ |
-| 51, 53, 55 | Gerimis | 🌦️ |
-| 56, 57 | Gerimis Beku | 🌦️ |
-| 61, 63, 65 | Hujan | 🌧️ |
-| 66, 67 | Hujan Beku | 🌧️ |
-| 71, 73, 75 | Salju | 🌨️ |
-| 77 | Hujan Salju | 🌨️ |
-| 80, 81, 82 | Hujan Lebat | 🌧️ |
-| 85, 86 | Hujan Salju Lebat | 🌨️ |
-| 95 | Badai Petir | ⛈️ |
-| 96, 99 | Badai Petir + Hujan Es | ⛈️ |
-
----
-
-## 🎮 Cara Menggunakan
-
-### Tab Cuaca
-1. Buka aplikasi → tab **Cuaca** otomatis terbuka
-2. Izinkan akses lokasi jika diminta (aplikasi otomatis deteksi GPS)
-3. Gunakan **search bar** untuk mencari kota (contoh: "Jakarta", "Bandung", "Tokyo")
-4. Pilih kota dari hasil pencarian
-5. Geser **prakiraan 7 hari** untuk lihat cuaca hari berikutnya
-6. **Tarik ke bawah** untuk refresh data
-
-### Tab Peta
-1. Tap tab **Peta** di bottom navigation
-2. Peta menampilkan lokasi Anda (marker biru)
-3. **Tap dimana saja** pada peta untuk lihat cuaca
-4. Info cuaca muncul di **bottom sheet**
-5. Tombol **bulat biru** → kembali ke lokasi Anda
-6. Tombol **+/-** → zoom in/out
-
----
-
-## ⚠️ Troubleshooting
-
-| Masalah | Solusi |
-|---|---|
-| Lokasi tidak terdeteksi | Izinkan akses lokasi + pastikan GPS aktif |
-| Peta tidak muncul | Cek koneksi internet (tile OSM butuh internet) |
-| Data cuaca gagal dimuat | Cek koneksi, pull-to-refresh untuk coba lagi |
-| `flutter: command not found` | Install Flutter SDK + tambahkan ke PATH |
-| Build gagal | `flutter clean` lalu `flutter pub get` |
-| Emulator tidak ditemukan | Android Studio → Device Manager → buat emulator baru |
-| `INSTALL_FAILED_INSUFFICIENT_STORAGE` | Wipe data emulator atau hapus app lama |
-
----
-
-## 📜 Lisensi
-
-Project ini dibuat untuk keperluan **tugas kuliah Semester 4 — Mata Kuliah Perangkat Bergerak**.
-
----
-
-*Dibuat dengan Flutter, Open-Meteo API & OpenStreetMap* 🚀
-# Weather & Map App
-
-Aplikasi Flutter untuk menampilkan informasi cuaca real-time dan peta interaktif. Dibangun sebagai tugas mata kuliah Perangkat Bergerak, Semester 4.
-
-## Screenshot
-
-| Halaman Cuaca | Halaman Peta |
-|:---:|:---:|
-| ![Home](Home.png) | ![Peta](Peta.png) |
-
-## Fitur Utama
-
-### Halaman Cuaca
-- Menampilkan cuaca saat ini berdasarkan lokasi pengguna (suhu, kelembaban, kecepatan angin)
-- Prakiraan cuaca 7 hari ke depan dalam format horizontal scroll
-- Pencarian kota dengan autocomplete menggunakan Open-Meteo Geocoding API
-- Pull-to-refresh untuk memuat ulang data cuaca
-- Fallback ke Jakarta jika lokasi tidak tersedia
-
-### Halaman Peta
-- Peta interaktif menggunakan OpenStreetMap (via `flutter_map`)
-- Tap pada peta untuk melihat cuaca di lokasi tertentu
-- Tombol navigasi ke lokasi saat ini
-- Kontrol zoom in/out
-- Popup informasi cuaca (suhu, deskripsi, kelembaban, angin) pada lokasi yang dipilih
-
-## Tech Stack
-
-| Teknologi | Keterangan |
-|---|---|
-| **Flutter** | Framework UI cross-platform |
-| **Dart** | Bahasa pemrograman (SDK ^3.11.1) |
-| **http** | HTTP client untuk API calls |
-| **flutter_map** | Rendering peta OpenStreetMap |
-| **latlong2** | Library koordinat geografis |
-| **geolocator** | Akses lokasi GPS perangkat |
-| **intl** | Formatting tanggal dan waktu |
-
-## API
-
-Aplikasi ini menggunakan **Open-Meteo API** (gratis, tanpa API key):
-
-- **Weather Forecast**: `https://api.open-meteo.com/v1/forecast`
-- **Geocoding**: `https://geocoding-api.open-meteo.com/v1/search`
-
-## Struktur Proyek
-
-```
-lib/
-├── main.dart                   # Entry point aplikasi
-├── models/
-│   └── weather_model.dart      # Model data: WeatherData, ForecastData, LocationData
-├── screens/
-│   ├── home_screen.dart        # Bottom navigation (Cuaca & Peta)
-│   ├── weather_screen.dart     # Halaman cuaca + pencarian kota
-│   └── map_screen.dart         # Halaman peta interaktif
-├── services/
-│   ├── weather_service.dart    # Service API cuaca & geocoding
-│   └── location_service.dart   # Service GPS & perizinan lokasi
-└── widgets/
-    ├── weather_card.dart       # Kartu cuaca utama (gradient biru)
-    └── forecast_item.dart      # Item prakiraan harian
-```
-
-## Instalasi
-
-### Prasyarat
-- Flutter SDK >= 3.11.1
-- Android Studio / VS Code
-- Emulator Android atau perangkat fisik
-
-### Langkah-langkah
-
-1. **Clone repository**
-   ```bash
-   git clone <repository-url>
-   cd weather_map_app
-   ```
-
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Jalankan aplikasi**
-   ```bash
-   flutter run
-   ```
-
-4. **Build APK (release)**
-   ```bash
-   flutter build apk
-   ```
-   Output: `build/app/outputs/flutter-apk/app-release.apk`
-
-## Model Data
-
-### WeatherData
-| Field | Tipe | Keterangan |
-|---|---|---|
-| `temperature` | `double` | Suhu dalam °C |
-| `humidity` | `double` | Kelembaban (%) |
-| `windSpeed` | `double` | Kecepatan angin (km/h) |
-| `weatherCode` | `int` | Kode cuaca dari API |
-| `description` | `String` | Deskripsi cuaca (Bahasa Indonesia) |
-| `location` | `String` | Nama lokasi |
-
-### ForecastData
-| Field | Tipe | Keterangan |
-|---|---|---|
-| `date` | `DateTime` | Tanggal prakiraan |
-| `tempMax` | `double` | Suhu maksimum (°C) |
-| `tempMin` | `double` | Suhu minimum (°C) |
-| `weatherCode` | `int` | Kode cuaca dari API |
-| `description` | `String` | Deskripsi cuaca |
-
-### LocationData
-| Field | Tipe | Keterangan |
-|---|---|---|
-| `name` | `String` | Nama kota/lokasi |
-| `latitude` | `double` | Koordinat lintang |
-| `longitude` | `double` | Koordinat bujur |
-| `country` | `String?` | Nama negara |
-| `admin1` | `String?` | Provinsi/wilayah |
-
-## Kode Cuaca (WMO)
-
-| Kode | Deskripsi | Ikon |
-|---|---|---|
-| 0 | Cerah | ☀️ |
-| 1-2 | Cerah Berawan | 🌤️ |
-| 3 | Berawan | ☁️ |
-| 45-48 | Berkabut | 🌫️ |
 | 51-57 | Gerimis | 🌦️ |
 | 61-67 | Hujan | 🌧️ |
 | 71-77 | Salju | 🌨️ |
@@ -357,99 +200,122 @@ lib/
 | 85-86 | Hujan Salju Lebat | 🌨️ |
 | 95-99 | Badai Petir | ⛈️ |
 
-## Lisensi
+### 7.2 Open-Meteo Geocoding API
 
-Proyek ini dibuat untuk tujuan pendidikan.
-# Aplikasi Cuaca & Peta (Weather & Map)
+- **Base URL**: `https://geocoding-api.open-meteo.com/v1/search`
+- **Metode**: GET
+- **Autentikasi**: Tidak diperlukan
+- **Parameter**:
 
-Aplikasi mobile Flutter yang menampilkan data cuaca real-time dan peta interaktif. Menggunakan Open-Meteo API dan OpenStreetMap - **tanpa memerlukan API key berbayar**.
+| Parameter | Nilai | Keterangan |
+|-----------|-------|------------|
+| `name` | Query pencarian | Nama kota/lokasi yang dicari |
+| `count` | `5` | Jumlah hasil maksimal |
+| `language` | `id` | Bahasa Indonesia |
+| `format` | `json` | Format response |
 
-## Screenshot Fitur
+### 7.3 OpenStreetMap Tile Server
 
-| Tab Cuaca | Tab Peta |
-|-----------|----------|
-| Lihat cuaca lokasi saat ini & cari kota manapun | Peta interaktif, tap untuk lihat cuaca |
+- **URL Template**: `https://tile.openstreetmap.org/{z}/{x}/{y}.png`
+- **Lisensi**: ODbL (Open Database License)
+- **Kredit**: Wajib mencantumkan "(c) OpenStreetMap contributors"
 
-## Fitur Utama
+---
 
-### Tab Cuaca
-- **Deteksi Lokasi Otomatis** - Mendeteksi lokasi user via GPS (fallback ke Jakarta jika gagal)
-- **Pencarian Kota** - Cari kota manapun di dunia dengan autocomplete
-- **Cuaca Saat Ini** - Menampilkan suhu, kelembaban, kecepatan angin, dan kondisi cuaca
-- **Prakiraan 7 Hari** - Prakiraan cuaca harian selama seminggu ke depan
-- **Pull to Refresh** - Tarik ke bawah untuk memperbarui data cuaca
+## 8. Prasyarat Lingkungan
 
-### Tab Peta
-- **Peta Interaktif** - Peta OpenStreetMap yang bisa di-zoom dan digeser
-- **Tap untuk Cuaca** - Tap lokasi di peta untuk melihat cuaca di titik tersebut
-- **Marker Lokasi** - Menampilkan marker lokasi saat ini dan lokasi yang dipilih
-- **Kontrol Peta** - Tombol zoom in/out dan kembali ke lokasi saat ini
-- **Popup Info Cuaca** - Detail cuaca muncul di bottom sheet saat lokasi dipilih
+Sebelum menjalankan aplikasi, pastikan environment berikut sudah terpenuhi:
 
-## Teknologi yang Digunakan
+### 8.1 Software yang Diperlukan
 
-| Teknologi | Kegunaan |
-|-----------|----------|
-| **Flutter 3.x** | Framework UI cross-platform |
-| **Open-Meteo API** | Data cuaca gratis tanpa API key |
-| **Open-Meteo Geocoding** | Pencarian lokasi/kota |
-| **OpenStreetMap** | Tile peta gratis dan open-source |
-| **flutter_map** | Widget peta interaktif untuk Flutter |
-| **geolocator** | Akses lokasi GPS user |
-| **http** | HTTP client untuk API requests |
-| **latlong2** | Handling koordinat latitude/longitude |
-| **intl** | Format tanggal dan waktu |
-| **Material Design 3** | UI modern dengan tema biru |
+| Software | Versi Minimum | Link Download |
+|----------|---------------|---------------|
+| Flutter SDK | 3.x | https://flutter.dev/docs/get-started/install |
+| Dart SDK | 3.x (bundled dengan Flutter) | - |
+| Android Studio | Terbaru | https://developer.android.com/studio |
+| VS Code (opsional) | Terbaru | https://code.visualstudio.com/ |
+| Git | Terbaru | https://git-scm.com/ |
 
-## Prasyarat
+### 8.2 Flutter Plugins (untuk IDE)
 
-Sebelum menjalankan aplikasi, pastikan Anda sudah menginstall:
+- **Android Studio**: Install plugin "Flutter" dan "Dart" via Settings > Plugins
+- **VS Code**: Install extension "Flutter" dari marketplace
 
-- [Flutter SDK](https://flutter.dev/docs/get-started/install) (versi 3.x atau lebih baru)
-- [Android Studio](https://developer.android.com/studio) atau [VS Code](https://code.visualstudio.com/) dengan Flutter plugin
-- Android Emulator atau perangkat Android fisik dengan USB Debugging aktif
-- (Opsional) Xcode untuk menjalankan di iOS
+### 8.3 Perangkat Testing
 
-## Langkah-langkah Menjalankan Aplikasi
+Salah satu dari berikut:
+- **Android Emulator** yang dibuat melalui Android Studio > Device Manager
+- **Perangkat Android Fisik** dengan USB Debugging aktif (Settings > Developer Options > USB Debugging)
 
-### 1. Clone Repository
+### 8.4 Verifikasi Environment
+
+Jalankan perintah berikut untuk memastikan Flutter sudah terinstall dengan benar:
+
+```bash
+flutter doctor
+```
+
+Pastikan semua checklist hijau (terutama Flutter, Android toolchain, dan Connected device).
+
+---
+
+## 9. Langkah-langkah Instalasi & Menjalankan Aplikasi
+
+### Langkah 1: Clone Repository
 
 ```bash
 git clone https://github.com/username/repo-name.git
 cd repo-name/weather_map_app
 ```
 
-### 2. Install Dependencies
+> Ganti `username/repo-name` dengan URL repository GitHub yang sebenarnya.
+
+### Langkah 2: Install Dependencies
 
 ```bash
 flutter pub get
 ```
 
-### 3. Cek Perangkat yang Terhubung
+Perintah ini akan mengunduh semua package yang terdaftar di `pubspec.yaml`. Output yang diharapkan:
+
+```
+Resolving dependencies...
+Downloading packages...
+Got dependencies!
+```
+
+### Langkah 3: Cek Perangkat yang Terhubung
 
 ```bash
 flutter devices
 ```
 
-Pastikan ada emulator atau perangkat yang muncul di daftar. Jika belum:
-- **Android Emulator**: Buka Android Studio > Tools > Device Manager > Buat emulator baru
-- **Perangkat Fisik**: Aktifkan USB Debugging di Settings > Developer Options
+Pastikan minimal satu perangkat muncul di daftar. Jika tidak ada:
 
-### 4. Jalankan Aplikasi
+- **Emulator**: Buka Android Studio > Tools > Device Manager > Create Device > Pilih "Medium Phone" dengan API level 36 atau yang tersedia.
+- **Device Fisik**: Sambungkan via USB, aktifkan USB Debugging, dan izinkan koneksi dari komputer.
+
+### Langkah 4: Jalankan Aplikasi
 
 ```bash
 flutter run
 ```
 
-Atau untuk mode release:
+Aplikasi akan di-build dan otomatis terbuka di perangkat yang terhubung. Pertama kali dijalankan, proses build akan memakan waktu beberapa menit.
+
+**Perintah alternatif:**
 
 ```bash
+# Jalankan dalam mode release (lebih cepat, tanpa debug)
 flutter run --release
+
+# Jalankan di perangkat tertentu (jika ada lebih dari 1 device)
+flutter run -d <device_id>
 ```
 
-### 5. (Opsional) Build APK
+### Langkah 5: Build APK (Opsional)
 
-Untuk membuat file APK yang bisa diinstall di perangkat Android:
+Untuk menghasilkan file APK yang bisa diinstall langsung di perangkat Android:
 
 ```bash
 flutter build apk --release
@@ -460,74 +326,208 @@ File APK akan tersedia di:
 build/app/outputs/flutter-apk/app-release.apk
 ```
 
-## Cara Menggunakan Aplikasi
-
-### Menggunakan Tab Cuaca
-1. Buka aplikasi, tab **Cuaca** akan otomatis terbuka
-2. Aplikasi akan mendeteksi lokasi Anda secara otomatis (izinkan akses lokasi jika diminta)
-3. Gunakan **search bar** di atas untuk mencari kota lain (contoh: "Jakarta", "Bandung", "Tokyo")
-4. Pilih kota dari hasil pencarian untuk melihat cuaca di kota tersebut
-5. Geser **prakiraan 7 hari** di bagian bawah untuk melihat cuaca hari-hari berikutnya
-6. Tarik layar ke bawah untuk **refresh** data cuaca
-
-### Menggunakan Tab Peta
-1. Tap tab **Peta** di bottom navigation bar
-2. Peta akan menampilkan lokasi Anda saat ini (marker biru)
-3. **Tap di mana saja** pada peta untuk melihat cuaca di lokasi tersebut
-4. Info cuaca akan muncul di **bottom sheet** dengan detail suhu dan kondisi
-5. Gunakan tombol **bulat biru** (kanan atas) untuk kembali ke lokasi Anda
-6. Gunakan tombol **+/-** untuk zoom in/out peta
-
-## Struktur Project
-
+Untuk build APK yang lebih kecil (split per ABI):
+```bash
+flutter build apk --split-per-abi --release
 ```
-weather_map_app/
-├── lib/
-│   ├── models/
-│   │   └── weather_model.dart       # Model: WeatherData, ForecastData, LocationData
-│   ├── services/
-│   │   ├── weather_service.dart     # Service: fetch cuaca & geocoding dari Open-Meteo
-│   │   └── location_service.dart    # Service: akses GPS & permission lokasi
-│   ├── screens/
-│   │   ├── home_screen.dart         # Bottom navigation (Cuaca & Peta tabs)
-│   │   ├── weather_screen.dart      # Layar cuaca + search + forecast
-│   │   └── map_screen.dart          # Layar peta interaktif + cuaca on-tap
-│   ├── widgets/
-│   │   ├── weather_card.dart        # Komponen card cuaca saat ini
-│   │   └── forecast_item.dart       # Komponen item prakiraan harian
-│   └── main.dart                    # Entry point aplikasi
-├── pubspec.yaml                     # Konfigurasi dependencies
-└── README.md                        # Dokumentasi ini
-```
-
-## Sumber Data
-
-### Open-Meteo API
-- **Website**: https://open-meteo.com/
-- **Gratis** dan **tanpa API key**
-- Data cuaca real-time dan prakiraan
-- Mendukung geocoding (pencarian lokasi berdasarkan nama kota)
-
-### OpenStreetMap
-- **Website**: https://www.openstreetmap.org/
-- Tile peta gratis dan open-source
-- Cakupan global
-
-## Troubleshooting
-
-| Masalah | Solusi |
-|---------|--------|
-| Lokasi tidak terdeteksi | Pastikan izin lokasi diberikan dan GPS aktif |
-| Peta tidak muncul | Cek koneksi internet, tile OSM membutuhkan internet |
-| Data cuaca gagal dimuat | Cek koneksi internet, pull-to-refresh untuk coba lagi |
-| `flutter: command not found` | Install Flutter SDK dan tambahkan ke PATH |
-| Build gagal | Jalankan `flutter clean` lalu `flutter pub get` |
-| Emulator tidak ditemukan | Buka Android Studio > Device Manager > buat emulator baru |
-
-## Lisensi
-
-Project ini dibuat untuk keperluan tugas kuliah Semester 4 - Perangkat Bergerak.
 
 ---
 
-Dibuat dengan Flutter & Open-Meteo API
+## 10. Panduan Penggunaan
+
+### 10.1 Menggunakan Tab Cuaca
+
+1. **Buka aplikasi** -- Tab **Cuaca** akan otomatis terbuka sebagai halaman pertama.
+2. **Izinkan akses lokasi** -- Jika muncul dialog izin lokasi, tap "Allow" / "Izinkan". Aplikasi akan mendeteksi lokasi Anda secara otomatis.
+3. **Lihat cuaca saat ini** -- Card biru menampilkan suhu, kondisi cuaca, kelembaban, kecepatan angin, dan waktu.
+4. **Cari kota lain** -- Tap search bar di atas, ketik nama kota (contoh: "Jakarta", "Bandung", "Surabaya", "Tokyo"). Hasil pencarian akan muncul secara otomatis.
+5. **Pilih kota** -- Tap salah satu hasil pencarian untuk melihat cuaca di kota tersebut.
+6. **Lihat prakiraan** -- Geser (scroll horizontal) pada bagian "Prakiraan 7 Hari" untuk melihat cuaca hari-hari berikutnya.
+7. **Refresh data** -- Tarik layar ke bawah dan lepas untuk memperbarui data cuaca.
+
+### 10.2 Menggunakan Tab Peta
+
+1. **Buka tab Peta** -- Tap ikon **Peta** di bottom navigation bar.
+2. **Lihat lokasi Anda** -- Marker biru transparan menunjukkan posisi Anda saat ini.
+3. **Tap peta** -- Tap di mana saja pada peta untuk melihat cuaca di lokasi tersebut. Marker merah akan muncul dan info cuaca akan tampil di panel bawah.
+4. **Baca info cuaca** -- Panel bawah (bottom sheet) menampilkan suhu, kondisi cuaca, kelembaban, dan kecepatan angin di titik yang dipilih.
+5. **Tutup panel** -- Tap tombol X di pojok kanan panel untuk menutup info cuaca.
+6. **Kembali ke lokasi** -- Tap tombol biru (ikon target) di kanan atas untuk mengembalikan peta ke lokasi Anda.
+7. **Zoom peta** -- Gunakan tombol +/- atau pinch-to-zoom pada layar sentuh.
+
+---
+
+## 11. Struktur Direktori Project
+
+```
+weather_map_app/
+│
+├── lib/                                # Source code utama aplikasi
+│   ├── models/
+│   │   └── weather_model.dart          # Data classes: WeatherData, ForecastData, LocationData
+│   │
+│   ├── services/
+│   │   ├── weather_service.dart        # Business logic: fetch cuaca, geocoding, parsing JSON
+│   │   └── location_service.dart       # Business logic: akses GPS, permission, fallback lokasi
+│   │
+│   ├── screens/
+│   │   ├── home_screen.dart            # Layar utama dengan BottomNavigationBar (2 tab)
+│   │   ├── weather_screen.dart         # Layar cuaca: search, current weather, forecast
+│   │   └── map_screen.dart             # Layar peta: flutter_map, markers, tap-to-weather
+│   │
+│   ├── widgets/
+│   │   ├── weather_card.dart           # Komponen card cuaca saat ini (gradient biru)
+│   │   └── forecast_item.dart          # Komponen card prakiraan harian (horizontal list)
+│   │
+│   └── main.dart                       # Entry point: inisialisasi MaterialApp & routing
+│
+├── screenshots/                        # Screenshot aplikasi untuk dokumentasi
+│   ├── weather_screen.png
+│   └── map_screen.png
+│
+├── android/                            # Konfigurasi Android native
+│   └── app/src/main/
+│       └── AndroidManifest.xml         # Permission: lokasi, internet
+│
+├── pubspec.yaml                        # Konfigurasi dependencies & metadata project
+├── analysis_options.yaml               # Konfigurasi linting rules
+└── README.md                           # Dokumentasi ini
+```
+
+---
+
+## 12. Penjelasan Kode
+
+### 12.1 Model Layer -- `weather_model.dart`
+
+File ini berisi tiga data class:
+
+- **`WeatherData`** -- Merepresentasikan data cuaca saat ini (suhu, kelembaban, angin, kode cuaca, deskripsi, lokasi, waktu). Termasuk factory constructor `fromJson()` untuk parsing JSON dari API, serta getter `weatherIcon` yang memetakan kode cuaca ke emoji.
+
+- **`ForecastData`** -- Merepresentasikan prakiraan cuaca harian (tanggal, suhu max, suhu min, kode cuaca). Termasuk factory constructor `fromJson()` dan getter `weatherIcon`.
+
+- **`LocationData`** -- Merepresentasikan hasil pencarian geocoding (nama kota, latitude, longitude, negara, provinsi). Getter `displayName` menggabungkan nama kota dengan provinsi/negara.
+
+### 12.2 Service Layer -- `weather_service.dart`
+
+Class `WeatherService` menangani seluruh komunikasi dengan Open-Meteo API:
+
+- **`fetchWeather(lat, lon)`** -- Melakukan GET request ke endpoint forecast, mengembalikan raw JSON.
+- **`searchLocation(query)`** -- Melakukan GET request ke geocoding API, mengembalikan `List<LocationData>`.
+- **`getWeatherForLocation(location)`** -- Menggabungkan fetch cuaca dan parsing untuk lokasi tertentu.
+
+### 12.3 Service Layer -- `location_service.dart`
+
+Class `LocationService` menangani akses ke GPS perangkat:
+
+- **`isLocationServiceEnabled()`** -- Cek apakah GPS aktif.
+- **`checkPermission()`** -- Cek dan minta izin lokasi ke user.
+- **`getCurrentPosition()`** -- Ambil posisi GPS dengan akurasi tinggi.
+- **`getCurrentPositionOrDefault()`** -- Ambil posisi GPS, fallback ke koordinat Jakarta (-6.2088, 106.8456) jika gagal.
+
+### 12.4 Screen Layer
+
+- **`HomeScreen`** -- StatefulWidget yang mengelola `BottomNavigationBar` dengan 2 tab (Cuaca & Peta). Menggunakan `IndexedStack` pattern melalui list widget.
+
+- **`WeatherScreen`** -- StatefulWidget utama untuk fitur cuaca. Mengelola state: `_currentWeather`, `_forecast`, `_searchResults`, `_isLoading`, `_errorMessage`. Menggunakan `RefreshIndicator` untuk pull-to-refresh dan `ListView.builder` untuk dropdown hasil pencarian.
+
+- **`MapScreen`** -- StatefulWidget untuk peta interaktif. Menggunakan `FlutterMap` dengan `TileLayer` (OpenStreetMap) dan `MarkerLayer` (marker lokasi + marker terpilih). Method `_onMapTap()` dipanggil saat user tap peta, lalu fetch cuaca untuk koordinat tersebut.
+
+### 12.5 Widget Layer
+
+- **`WeatherCard`** -- Card bergaya gradient biru yang menampilkan cuaca saat ini secara visual menarik, mencakup ikon cuaca besar, suhu, lokasi, dan tiga indikator (kelembaban, angin, waktu).
+
+- **`ForecastItem`** -- Card kecil untuk setiap hari prakiraan, ditampilkan dalam horizontal scroll. Menggunakan package `intl` untuk format nama hari dan tanggal.
+
+---
+
+## 13. Konfigurasi Android
+
+### 13.1 Permissions (AndroidManifest.xml)
+
+Berikut permission yang ditambahkan ke `android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<!-- Location permissions for GPS -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<!-- Internet permission -->
+<uses-permission android:name="android.permission.INTERNET" />
+```
+
+| Permission | Alasan |
+|------------|--------|
+| `ACCESS_FINE_LOCATION` | Mendapatkan lokasi GPS dengan akurasi tinggi |
+| `ACCESS_COARSE_LOCATION` | Fallback lokasi berdasarkan network (cell tower/WiFi) |
+| `INTERNET` | Mengakses Open-Meteo API dan tile OpenStreetMap |
+
+### 13.2 Minimum SDK
+
+Konfigurasi minimum SDK diatur di `android/app/build.gradle`:
+- **minSdkVersion**: 21 (Android 5.0 Lollipop)
+- **compileSdkVersion**: 34
+- **targetSdkVersion**: 34
+
+---
+
+## 14. Troubleshooting
+
+### 14.1 Masalah Umum
+
+| No | Masalah | Penyebab | Solusi |
+|----|---------|----------|--------|
+| 1 | `flutter: command not found` | Flutter SDK belum terinstall atau belum di PATH | Install Flutter SDK dan tambahkan `flutter/bin` ke PATH sistem |
+| 2 | `No devices found` | Tidak ada emulator/device terhubung | Buat emulator baru di Android Studio atau sambungkan device dengan USB Debugging |
+| 3 | Build gagal dengan error dependencies | Dependencies belum terinstall atau cache rusak | Jalankan `flutter clean` lalu `flutter pub get` |
+| 4 | Lokasi tidak terdeteksi | Izin lokasi ditolak atau GPS mati | Buka Settings > Apps > weather_map_app > Permissions > Allow Location |
+| 5 | Peta tidak muncul / blank | Tidak ada koneksi internet | Pastikan perangkat terhubung ke internet untuk load tile OSM |
+| 6 | Data cuaca error/gagal | Server Open-Meteo down atau internet bermasalah | Tunggu beberapa saat, lalu pull-to-refresh atau tap "Coba Lagi" |
+| 7 | `FAILURE: Build failed` di Android | Gradle atau SDK mismatch | Jalankan `flutter doctor` dan perbaiki sesuai rekomendasi |
+| 8 | Emulator sangat lambat | Resource komputer tidak cukup | Gunakan device fisik atau emulator dengan API level lebih rendah |
+
+### 14.2 Perintah Berguna untuk Debugging
+
+```bash
+# Cek status environment Flutter
+flutter doctor -v
+
+# Bersihkan cache build
+flutter clean
+
+# Install ulang dependencies
+flutter pub get
+
+# Lihat log aplikasi saat berjalan
+flutter logs
+
+# Analisis kode untuk error/warning
+flutter analyze
+
+# Jalankan dengan verbose output
+flutter run -v
+```
+
+---
+
+## 15. Kesimpulan
+
+Aplikasi **Cuaca & Peta** berhasil mengimplementasikan integrasi antara framework Flutter dengan layanan API publik (Open-Meteo) dan peta open-source (OpenStreetMap) tanpa memerlukan API key berbayar. Fitur-fitur utama yang telah diimplementasikan meliputi:
+
+1. Pengambilan data cuaca real-time dan prakiraan 7 hari dari Open-Meteo API.
+2. Pencarian lokasi kota menggunakan Open-Meteo Geocoding API.
+3. Peta interaktif berbasis OpenStreetMap dengan fungsi zoom, pan, dan tap-to-weather.
+4. Deteksi lokasi user menggunakan GPS perangkat via plugin geolocator.
+5. Antarmuka modern menggunakan Material Design 3 dengan bottom navigation.
+6. Error handling dan loading states yang informatif bagi pengguna.
+
+Aplikasi ini dapat dikembangkan lebih lanjut dengan menambahkan fitur seperti:
+- Notifikasi cuaca berbasis lokasi
+- Widget home screen
+- Penyimpanan kota favorit (local storage)
+- Dark mode
+- Multi-bahasa (i18n)
+- Integrasi dengan API cuaca lain (BMKG, OpenWeatherMap)
+
+---
+
+> **Catatan**: Project ini dibuat untuk memenuhi tugas mata kuliah Perangkat Bergerak, Semester 4.
